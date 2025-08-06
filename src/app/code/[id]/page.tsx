@@ -73,6 +73,34 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     }
   };
 
+  const handleDeploy = async () => {
+    if (!project) return;
+    
+    try {
+      const response = await fetch('/api/deploy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          files,
+          title: project.title,
+          projectId: project.id
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        console.log('Project deployed successfully');
+      } else {
+        throw new Error(data.error || 'Deployment failed');
+      }
+    } catch (error) {
+      console.error('Failed to deploy project:', error);
+      throw error;
+    }
+  };
+
   if (!isAuthenticated || isLoading) {
     return (
       <div className="h-screen w-full bg-white flex items-center justify-center">
@@ -103,8 +131,9 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
         <CustomEditor
           files={files}
           onFilesChange={handleFilesChange}
-          onDeploy={() => {}}
+          onDeploy={handleDeploy}
           projectTitle={project.title}
+          projectId={project.id}
         />
       </div>
     </div>

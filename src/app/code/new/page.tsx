@@ -9,8 +9,19 @@ import CustomEditor from '@/components/CustomEditor';
 export default function NewProjectPage() {
   const { isSignedIn } = useAuth();
   const router = useRouter();
-  const [files, setFiles] = useState({
-    '/index.html': `<!DOCTYPE html>
+  const [files, setFiles] = useState<Record<string, string>>(() => {
+    const selectedTemplate = localStorage.getItem('selectedTemplate');
+    if (selectedTemplate) {
+      try {
+        const templateData = JSON.parse(selectedTemplate);
+        localStorage.removeItem('selectedTemplate');
+        return templateData.files;
+      } catch (error) {
+        console.error('Error parsing template data:', error);
+      }
+    }
+    return {
+      '/index.html': `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -24,8 +35,20 @@ export default function NewProjectPage() {
   </div>
 </body>
 </html>`
+    };
   });
-
+  const [projectTitle, setProjectTitle] = useState(() => {
+    const selectedTemplate = localStorage.getItem('selectedTemplate');
+    if (selectedTemplate) {
+      try {
+        const templateData = JSON.parse(selectedTemplate);
+        return templateData.title;
+      } catch (error) {
+        console.error('Error parsing template data:', error);
+      }
+    }
+    return 'New Project';
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -55,7 +78,7 @@ export default function NewProjectPage() {
           files={files}
           onFilesChange={handleFilesChange}
           onDeploy={() => {}}
-          projectTitle="New Project"
+          projectTitle={projectTitle}
         />
       </div>
     </div>

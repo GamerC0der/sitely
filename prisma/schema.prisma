@@ -16,6 +16,8 @@ model Site {
   updatedAt DateTime @updatedAt
   title     String?
   files     File[]
+  visits    SiteVisit[]
+  analytics SiteAnalytics[]
 }
 
 model File {
@@ -28,4 +30,44 @@ model File {
   updatedAt DateTime @updatedAt
 
   @@unique([siteId, name])
+}
+
+model SiteVisit {
+  id        String   @id @default(uuid())
+  siteId    String
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  visitorId String
+  userAgent String?
+  referrer  String?
+  ipAddress String?
+  country   String?
+  city      String?
+  browser   String?
+  os        String?
+  device    String?
+  screenResolution String?
+  language  String?
+  startTime DateTime @default(now())
+  endTime   DateTime?
+  duration  Int?     @db.Int
+  pageViews Int      @default(1)
+  isBounce  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model SiteAnalytics {
+  id        String   @id @default(uuid())
+  siteId    String
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  totalVisits Int    @default(0)
+  uniqueVisitors Int @default(0)
+  totalDuration Int  @default(0)
+  bounceCount Int    @default(0)
+  avgSessionDuration Float @default(0)
+  bounceRate Float   @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([siteId, date])
 }
